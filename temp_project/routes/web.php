@@ -1,0 +1,11 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('dashboard.index');
+});
+
+Route::get('/inventaire', function () {
+    return view('inventaire.index');
+});
