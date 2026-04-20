@@ -9,3 +9,6 @@ Route::get('/', function () {
 Route::get('/inventaire', function () {
     return view('inventaire.index');
 });
+Route::get('/entrees', function () {
+    return view('entrees.index');
+});
