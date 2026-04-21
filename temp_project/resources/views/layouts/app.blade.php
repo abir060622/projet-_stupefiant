@@ -13,11 +13,12 @@
         </div>
 
         <div style="font-size:10px; color:#8899bb; margin:10px 0 8px;">NAVIGATION</div>
-        <a href="/" style="color:white; text-decoration:none; padding:10px 12px; border-radius:8px; background:#2a3a5c; margin-bottom:5px; display:block;">🏠 Accueil</a>
+        <a href="/" style="color:white; text-decoration:none; padding:10px 12px; border-radius:8px; background:#2a3a5c; margin-bottom:5px; display:block;"> Accueil</a>
 
         <div style="font-size:10px; color:#8899bb; margin:15px 0 8px;">STOCKS & PRODUITS</div>
-        <a href="/inventaire" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;">📦 Inventaire</a>
-        <a href="/entrees" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;">✅ Entrées Stock</a>
+        <a href="/inventaire" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Inventaire</a>
+        <a href="/entrees" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Entrées Stock</a>
+        <a href="/distributions" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Distributions</a>
 
         <div style="margin-top:auto;">
             <div style="background:#2a3a5c; border-radius:8px; padding:12px; margin-bottom:10px;">
