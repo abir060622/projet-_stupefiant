@@ -16,6 +16,9 @@ class Distribution extends Model
         'date_distribution',
         'responsable',
         'statut',
+        'signature_infirmier',
+        'signature_responsable',
+        'validation_statut',
     ];
 
     protected $casts = [

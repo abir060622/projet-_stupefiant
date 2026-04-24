@@ -138,6 +138,28 @@ Route::get('/distributions/ajouter', function () {
     return view('distributions.ajouter', compact('produits'));
 });
 
+Route::get('/distributions', function (Request $request) {
+    $query = \App\Models\Distribution::query();
+    if ($request->search) {
+        $query->where('produit', 'like', '%'.$request->search.'%')
+              ->orWhere('numero_bon', 'like', '%'.$request->search.'%')
+              ->orWhere('medecin', 'like', '%'.$request->search.'%');
+    }
+    if ($request->date) {
+        $query->whereDate('date_distribution', $request->date);
+    }
+    if ($request->statut) {
+        $query->where('validation_statut', $request->statut);
+    }
+    $distributions = $query->latest()->get();
+    return view('distributions.index', compact('distributions'));
+});
+
+Route::get('/distributions/ajouter', function () {
+    $produits = \App\Models\Produit::all();
+    return view('distributions.ajouter', compact('produits'));
+});
+
 Route::post('/distributions/ajouter', function (Request $request) {
     \App\Models\Distribution::create([
         'numero_bon' => $request->numero_bon,
@@ -149,23 +171,100 @@ Route::post('/distributions/ajouter', function (Request $request) {
         'date_distribution' => $request->date_distribution,
         'responsable' => 'Admin Pharmacie',
         'statut' => 'en_attente',
+        'signature_infirmier' => null,
+        'signature_responsable' => null,
+        'validation_statut' => 'en_attente',
     ]);
-    return redirect('/distributions')->with('success', 'Distribution ajoutée !');
+    return redirect('/distributions')->with('success', 'Distribution enregistrée — En attente de double signature !');
 });
 
-Route::get('/distributions/valider/{id}', function ($id) {
-    \App\Models\Distribution::findOrFail($id)->update(['statut' => 'validee']);
-    return redirect('/distributions')->with('success', 'Distribution validée !');
+Route::get('/distributions/signer-infirmier/{id}', function (Request $request, $id) {
+    $distribution = \App\Models\Distribution::findOrFail($id);
+    $distribution->update([
+        'signature_infirmier' => $request->nom ?? 'Infirmier',
+        'validation_statut' => $distribution->signature_responsable ? 'validee' : 'une_signature',
+        'statut' => $distribution->signature_responsable ? 'validee' : 'en_attente',
+    ]);
+    return redirect('/distributions')->with('success', '✅ Signature infirmier enregistrée !');
+});
+
+Route::get('/distributions/signer-responsable/{id}', function (Request $request, $id) {
+    $distribution = \App\Models\Distribution::findOrFail($id);
+    $distribution->update([
+        'signature_responsable' => $request->nom ?? 'Responsable',
+        'validation_statut' => $distribution->signature_infirmier ? 'validee' : 'une_signature',
+        'statut' => $distribution->signature_infirmier ? 'validee' : 'en_attente',
+    ]);
+    return redirect('/distributions')->with('success', '✅ Signature responsable enregistrée !');
 });
 
 Route::get('/distributions/rejeter/{id}', function ($id) {
-    \App\Models\Distribution::findOrFail($id)->update(['statut' => 'rejetee']);
+    \App\Models\Distribution::findOrFail($id)->update([
+        'validation_statut' => 'rejetee',
+        'statut' => 'rejetee'
+    ]);
     return redirect('/distributions')->with('success', 'Distribution rejetée !');
 });
+Route::get('/rapports', function () {
+    $totalProduits = \App\Models\Produit::count();
+    $stockTotal = \App\Models\Produit::sum('stock_actuel');
+    $ruptures = \App\Models\Produit::where('stock_actuel', 0)->count();
+    $stockFaible = \App\Models\Produit::whereColumn('stock_actuel', '<=', 'stock_min')->where('stock_actuel', '>', 0)->count();
 
-Route::get('/distributions/supprimer/{id}', function ($id) {
-    \App\Models\Distribution::findOrFail($id)->delete();
-    return redirect('/distributions')->with('success', 'Distribution supprimée !');
+    $totalEntrees = \App\Models\Entree::count();
+    $entreesValidees = \App\Models\Entree::where('statut', 'validee')->count();
+    $entreesAttente = \App\Models\Entree::where('statut', 'en_attente')->count();
+
+    $totalDistributions = \App\Models\Distribution::count();
+    $distributionsValidees = \App\Models\Distribution::where('statut', 'validee')->count();
+    $distributionsAttente = \App\Models\Distribution::where('statut', 'en_attente')->count();
+
+    $produits = \App\Models\Produit::all();
+    $entrees = \App\Models\Entree::latest()->take(5)->get();
+    $distributions = \App\Models\Distribution::latest()->take(5)->get();
+
+    return view('rapports.index', compact(
+        'totalProduits', 'stockTotal', 'ruptures', 'stockFaible',
+        'totalEntrees', 'entreesValidees', 'entreesAttente',
+        'totalDistributions', 'distributionsValidees', 'distributionsAttente',
+        'produits', 'entrees', 'distributions'
+    ));
+});
+Route::get('/pertes', function (Request $request) {
+    $query = \App\Models\Perte::query();
+    if ($request->search) {
+        $query->where('infirmier', 'like', '%'.$request->search.'%')
+              ->orWhere('produit', 'like', '%'.$request->search.'%');
+    }
+    $pertes = $query->latest()->get();
+    return view('pertes.index', compact('pertes'));
+});
+
+Route::get('/pertes/ajouter', function () {
+    $produits = \App\Models\Produit::all();
+    return view('pertes.ajouter', compact('produits'));
+});
+
+Route::post('/pertes/ajouter', function (Request $request) {
+    $nbPertes = \App\Models\Perte::where('infirmier', $request->infirmier)->count();
+    $statut = $nbPertes >= 1 ? 'alerte' : 'normale';
+
+    \App\Models\Perte::create([
+        'numero_bon' => $request->numero_bon,
+        'produit' => $request->produit,
+        'quantite' => $request->quantite,
+        'infirmier' => $request->infirmier,
+        'service' => $request->service,
+        'motif' => $request->motif,
+        'date_perte' => $request->date_perte,
+        'statut' => $statut,
+    ]);
+    return redirect('/pertes')->with('success', 'Perte enregistrée !');
+});
+
+Route::get('/pertes/supprimer/{id}', function ($id) {
+    \App\Models\Perte::findOrFail($id)->delete();
+    return redirect('/pertes')->with('success', 'Perte supprimée !');
 });
 
 Route::get('/logout', function () {

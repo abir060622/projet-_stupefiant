@@ -19,6 +19,8 @@
         <a href="/inventaire" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Inventaire</a>
         <a href="/entrees" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Entrées Stock</a>
         <a href="/distributions" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Distributions</a>
+        <a href="/rapports" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Rapports</a>
+        <a href="/pertes" style="color:#ccd6f6; text-decoration:none; padding:10px 12px; border-radius:8px; margin-bottom:5px; display:block;"> Pertes</a>
 
         <div style="margin-top:auto;">
             <div style="background:#2a3a5c; border-radius:8px; padding:12px; margin-bottom:10px;">
